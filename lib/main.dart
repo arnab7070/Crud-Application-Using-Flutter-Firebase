@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         }
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
-            title: 'Crud Using Firebase',
+            title: 'CRUD',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
