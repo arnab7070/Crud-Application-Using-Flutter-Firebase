@@ -18,13 +18,13 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         title: const Text('CRUD Application'),
       ),
-      body: ListData(),
+      body: const ListData(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddData(),
+              builder: (context) => const AddData(),
             ),
           );
         },
