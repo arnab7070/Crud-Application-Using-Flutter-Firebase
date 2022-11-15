@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:email_validator/email_validator.dart';
 
 class AddData extends StatefulWidget {
   const AddData({Key? key}) : super(key: key);
@@ -12,7 +13,7 @@ class AddData extends StatefulWidget {
 
 class _AddDataState extends State<AddData> {
   final _formkey = GlobalKey<FormState>();
-
+  RegExp pass_valid = RegExp(r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)");
   var name = "";
   var email = "";
   var password = "";
@@ -33,6 +34,43 @@ class _AddDataState extends State<AddData> {
         })
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
+  }
+
+  double password_strength = 0; 
+   // 0: No password
+  // 1/4: Weak
+  // 2/4: Medium
+  // 3/4: Strong
+  //   1:   Great
+  //A function that validate user entered password
+  bool validatePassword(String pass){
+    String _password = pass.trim();
+    if(_password.isEmpty){
+      setState(() {
+        password_strength = 0;
+      });
+    }else if(_password.length < 6 ){
+      setState(() {
+        password_strength = 1 / 4;
+      });
+    }else if(_password.length < 8){
+      setState(() {
+        password_strength = 2 / 4;
+      });
+    }else{
+      if(pass_valid.hasMatch(_password)){
+        setState(() {
+          password_strength = 4 / 4;
+        });
+        return true;
+      }else{
+        setState(() {
+          password_strength = 3 / 4;
+        });
+        return false;
+      }
+    }
+    return false;
   }
 
   @override
@@ -103,9 +141,13 @@ class _AddDataState extends State<AddData> {
                   ),
                   controller: emailController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    } else if (!value.contains('@')) {
+                    // if (value == null || value.isEmpty) {
+                    //   return 'Please enter your email';
+                    // } else if (!value.contains('@')) {
+                    //   return 'Please enter valid email';
+                    // }
+                    
+                    if(!EmailValidator.validate(value!)){
                       return 'Please enter valid email';
                     }
                     return null;
@@ -130,13 +172,39 @@ class _AddDataState extends State<AddData> {
                   ),
                   controller: passwordController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    } else if (value.length < 8) {
-                      return 'Minimum Password Length is 8';
-                    }
-                    return null;
+                    // if (value == null || value.isEmpty) {
+                    //   return 'Please enter your password';
+                    // } else if (value.length < 8) {
+                    //   return 'Minimum Password Length is 8';
+                    // }
+                    if(value!.isEmpty){
+                        return "Please enter password";
+                      }else{
+                       //call function to check password
+                        bool result = validatePassword(value);
+                        if(result){
+                          // create account event
+                         return null;
+                        }else{
+                          return "Password should contain 8 characters Capital, \nSmall letter, Number & Special Character";
+                        }
+                      }
                   },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: LinearProgressIndicator(
+                  value: password_strength,
+                  backgroundColor: Colors.grey[300],
+                  minHeight: 5,
+                  color: password_strength <= 1 / 4
+                      ? Colors.red
+                      : password_strength == 2 / 4
+                      ? Colors.yellow
+                      : password_strength == 3 / 4
+                      ? Colors.blue
+                      : Colors.green,
                 ),
               ),
               ButtonBar(
